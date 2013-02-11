@@ -19,7 +19,7 @@
 (in-package :cl-user)
 
 (defpackage :lowh.triangle.files
-  (:nicknames :L.>.files)
+  (:nicknames :L>files)
   (:use :cl :alexandria)
   (:import-from :cl-ppcre #:nsubseq)
   (:export
@@ -108,7 +108,10 @@ Return NIL otherwise."
 
 (defun directories (list)
   (declare (type list list))
-  (mapcar #'enough-namestring (mapcan #'directory list)))
+  (mapcar (lambda (p)
+	    (enough-namestring p
+			       (truename *default-pathname-defaults*)))
+	  (mapcan #'directory list)))
 
 ;;  Copying
 
