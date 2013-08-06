@@ -103,8 +103,9 @@
 (defun file-more-recent-p (a b)
   "Return T if A is more recent than B according to FILE-WRITE-DATE.
 Return NIL otherwise."
-  (when (cl-fad:file-exists-p a)
-    (> (file-write-date a) (file-write-date b))))
+  (or (not (file-exists-p b))
+      (and (file-exists-p a)
+	   (> (file-write-date a) (file-write-date b)))))
 
 (defun directories (list)
   (declare (type list list))
@@ -117,25 +118,32 @@ Return NIL otherwise."
 
 (defun copy-files (from to &key replace update exclude rename)
   (ensure-directories-exist to)
-  (mapcan
-   (lambda (src)
-     (let* ((src (enough-namestring src))
-	    (name (make-pathname :name (pathname-name src)
-				 :type (pathname-type src))))
-       (unless (etypecase exclude
-		 (sequence (member name exclude :test #'pathname-match-p))
-		 (function (funcall exclude name))
-		 (null nil))
-	 (let* ((renamed (etypecase rename
-			   (list (cdr (assoc name rename
-					     :test #'pathname-match-p)))
-			   (function (funcall rename (format nil "~A" name)))
-			   (null nil)))
-		(dest (merge-pathnames (or renamed name) to)))
-	   (unless (and update (file-more-recent-p dest src))
-	     (cl-fad:copy-file src dest :overwrite replace))
-	   `(,dest)))))
-   (directory from)))
+  (let (copied updated)
+    (dolist (src (directory from))
+      (let* ((src (enough-namestring src))
+	     (name (make-pathname :name (pathname-name src)
+				  :type (pathname-type src))))
+	(unless (etypecase exclude
+		  (sequence (member name exclude :test #'pathname-match-p))
+		  (function (funcall exclude name))
+		  (null nil))
+	  (let ((dest (if (pathname-name to)
+			  to
+			  (let ((renamed
+				 (etypecase rename
+				   (list (cdr
+					  (assoc name rename
+						 :test #'pathname-match-p)))
+				   (function (funcall rename
+						      (format nil "~A" name)))
+				   (null nil))))
+			    (merge-pathnames (or renamed name) to)))))
+	    (unless (and update (not (file-more-recent-p src dest)))
+	      (cl-fad:copy-file src dest :overwrite (or replace update))
+	      (push dest updated))
+	    (push dest copied)))))
+    (values (nreverse copied) (nreverse updated))))
+     
 
 ;;  Regex
 

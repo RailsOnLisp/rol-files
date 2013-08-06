@@ -27,6 +27,7 @@
   :version "0.1"
   :description "Pathname, files and streams utility library"
   :depends-on ("alexandria"
-	       "cl-fad")
+	       "cl-fad"
+	       "cl-ppcre")
   :components
   ((:file "files")))
