@@ -62,7 +62,9 @@
 
 ;;  Temporary files
 
-(defun open-temporary-file (&optional (prefix "/tmp/.tmp"))
+(defun open-temporary-file (&key (element-type 'base-char)
+			      (external-format :default)
+			      (prefix "/tmp/.tmp"))
   (let ((template (merge-pathnames
 		   (pathname (format nil "~A.XXXXXXXXXXXX" prefix)))))
     (multiple-value-bind (fd path) (sb-posix:mkstemp template)
@@ -73,21 +75,22 @@
 	     (setf stream
 		   (sb-sys:make-fd-stream fd
 					  :auto-close t
+					  :input t
 					  :output t
 					  :name (format nil "temporary ~D ~A"
 							fd file)
 					  :pathname (pathname path)
 					  :file file
-					  :element-type 'character 
-					  :external-format :utf-8))
+					  :element-type element-type
+					  :external-format external-format))
 	  (unless stream
 	    (sb-posix:close fd)))
 	stream))))
 
-(defmacro with-temporary-file ((stream-var &optional (prefix "/tmp/.tmp"))
+(defmacro with-temporary-file ((stream-var &rest options)
 			       &body body)
   (let ((g!stream (gensym "STREAM-")))
-    `(let ((,g!stream (open-temporary-file ,prefix)))
+    `(let ((,g!stream (open-temporary-file ,@options)))
        (unwind-protect
 	    (let ((,stream-var ,g!stream))
 	      ,@body)
