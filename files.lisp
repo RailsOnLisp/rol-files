@@ -31,6 +31,7 @@
    #:file-more-recent-p
    #:directories
    #:copy-files
+   #:read-into-string
    #:regex-stream-lines
    #:regex-lines))
 
@@ -188,3 +189,11 @@ Return NIL otherwise."
 		   (t
 		    (regex-stream-lines regex input replace match output)))))
     (resolve input match output)))
+
+(defun read-into-string (stream)
+  (with-output-to-string (string)
+    (let ((buffer (make-string 1024 :initial-element #\#)))
+      (loop
+	 :for pos = (read-sequence buffer stream)
+	 :while (< 0 pos)
+	 :do (write-sequence buffer string :end pos)))))
