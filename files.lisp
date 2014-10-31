@@ -31,6 +31,8 @@
    #:file-more-recent-p
    #:directories
    #:copy-files
+   #:link-file
+   #:unlink-file
    #:read-into-string
    #:regex-stream-lines
    #:regex-lines))
@@ -88,6 +90,12 @@
 	    (sb-posix:close fd)))
 	stream))))
 
+(defun link-file (oldpath newpath)
+  #+sbcl(sb-posix:link oldpath newpath))
+
+(defun unlink-file (pathname)
+  #+sbcl(sb-posix:unlink pathname))
+
 (defmacro with-temporary-file ((stream-var &rest options)
 			       &body body)
   (let ((g!stream (gensym "STREAM-")))
@@ -96,7 +104,7 @@
 	    (let ((,stream-var ,g!stream))
 	      ,@body)
 	 (close ,g!stream)
-	 (sb-posix:unlink (pathname ,g!stream))))))
+	 (unlink-file (pathname ,g!stream))))))
 
 ;;  Stat
 
