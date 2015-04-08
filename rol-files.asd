@@ -1,7 +1,7 @@
 ;;
-;;  LowH Triangle Files  -  Pathname, files and streams utility library
+;;  RoL-files  -  Pathname, files and streams utility library
 ;;
-;;  Copyright 2012 Thomas de Grivel <billitch@gmail.com>
+;;  Copyright 2012-2015 Thomas de Grivel <thomas@lowh.net>
 ;;
 ;;  Permission to use, copy, modify, and distribute this software for any
 ;;  purpose with or without fee is hereby granted, provided that the above
@@ -16,14 +16,16 @@
 ;;  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ;;
 
-(defpackage :lowh.triangle.files.system
-  (:use :cl :asdf))
+(in-package #:cl-user)
 
-(in-package :lowh.triangle.files.system)
+(defpackage #:RoL-files.system
+  (:use #:cl #:asdf))
 
-(asdf:defsystem :lowh.triangle.files
-  :name "lowh.triangle.files"
-  :author "Thomas de Grivel <billitch@gmail.com>"
+(in-package #:RoL-files.system)
+
+(asdf:defsystem :RoL-files
+  :name "RoL-files"
+  :author "Thomas de Grivel <thomas@lowh.net>"
   :version "0.1"
   :description "Pathname, files and streams utility library"
   :depends-on ("alexandria"

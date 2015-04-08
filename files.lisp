@@ -18,8 +18,8 @@
 
 (in-package :cl-user)
 
-(defpackage :lowh.triangle.files
-  (:nicknames :L>files)
+(defpackage :RoL-files
+  (:nicknames :L>files :lowh.triangle.files)
   (:use :cl :alexandria)
   (:import-from :cl-ppcre #:nsubseq)
   (:export
@@ -37,7 +37,7 @@
    #:regex-stream-lines
    #:regex-lines))
 
-(in-package :lowh.triangle.files)
+(in-package :RoL-files)
 
 ;;  Pathnames
 
