@@ -179,7 +179,7 @@ Return NIL otherwise."
 (defun regex% (regex string replace match-fun output)
   (cond
     (replace (multiple-value-bind (replaced matched)
-		 (cl-ppcre:regex-replace regex string replace)
+		 (cl-ppcre:regex-replace-all regex string replace :simple-calls t)
 	       (when (and match-fun matched)
 		 (funcall match-fun replaced))
 	       (when output
