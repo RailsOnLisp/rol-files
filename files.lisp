@@ -34,6 +34,7 @@
    #:link-file
    #:unlink-file
    #:read-into-string
+   #:readlink
    #:regex-stream-lines
    #:regex-lines))
 
@@ -155,7 +156,14 @@ Return NIL otherwise."
 	      (push dest updated))
 	    (push dest copied)))))
     (values (nreverse copied) (nreverse updated))))
-     
+
+
+;;  Stat
+
+(defun readlink (path)
+  #+sbcl
+  (ignore-errors (sb-posix:readlink path)))
+
 
 ;;  Regex
 
