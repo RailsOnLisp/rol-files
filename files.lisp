@@ -35,6 +35,8 @@
    #:unlink-file
    #:read-into-string
    #:readlink
+   #:do-lines
+   #:do-stream-lines
    #:regex-stream-lines
    #:regex-lines))
 
@@ -165,6 +167,26 @@ Return NIL otherwise."
   (ignore-errors (sb-posix:readlink path)))
 
 
+;;  Lines
+
+(defmacro do-lines ((var input) &body body)
+  (let ((g!in (gensym "IN-")))
+    `(let ((,g!in ,input))
+       (if (streamp ,g!in)
+           (do-stream-lines (,var ,g!in) ,@body)
+           (with-input-from-file/utf-8 (,g!in ,g!in)
+             (do-stream-lines (,var ,g!in) ,@body))))))
+
+(defmacro do-stream-lines ((var stream) &body body)
+  (let ((g!line (gensym "LINE-"))
+        (g!stream (gensym "STREAM-")))
+    `(let ((,g!stream ,stream))
+       (do ((,g!line (read-line ,g!stream nil) (read-line ,g!stream nil)))
+           ((null ,g!line))
+         (let ((,var ,g!line))
+           ,@body)))))
+
+
 ;;  Regex
 
 (defun regex-do-matches (regex string fn)
@@ -190,8 +212,7 @@ Return NIL otherwise."
     (t (warn "Neither replace or match were given to regex."))))
 
 (defun regex-stream-lines (regex input replace match output)
-  (do ((line #1=(read-line input nil) #1#))
-      ((null line))
+  (do-stream-lines (line input)
     (regex% regex line replace match output)))
 
 (defun regex-lines (regex input &key replace match output)
