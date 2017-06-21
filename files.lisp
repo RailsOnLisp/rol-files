@@ -51,47 +51,47 @@
 
 (defmacro with-output-to-file/utf-8 ((stream filespec) &body body)
   `(with-open-file (,stream ,filespec
-			    :direction :output
-			    :if-exists :supersede
-			    :if-does-not-exist :create
-			    :element-type 'character
-			    :external-format :utf-8)
+                            :direction :output
+                            :if-exists :supersede
+                            :if-does-not-exist :create
+                            :element-type 'character
+                            :external-format :utf-8)
      ,@body))
 
 (defmacro with-input-from-file/utf-8 ((stream filespec) &body body)
   `(with-open-file (,stream ,filespec
-			    :direction :input
-			    :if-does-not-exist :error
-			    :element-type 'character
-			    :external-format :utf-8)
+                            :direction :input
+                            :if-does-not-exist :error
+                            :element-type 'character
+                            :external-format :utf-8)
      ,@body))
 
 ;;  Temporary files
 
 (defun open-temporary-file (&key (element-type 'base-char)
-			      (external-format :default)
-			      (prefix "/tmp/.tmp"))
+                              (external-format :default)
+                              (prefix "/tmp/.tmp"))
   (let ((template (merge-pathnames
-		   (pathname (format nil "~A.XXXXXXXXXXXX" prefix)))))
+                   (pathname (format nil "~A.XXXXXXXXXXXX" prefix)))))
     (multiple-value-bind (fd path) (sb-posix:mkstemp template)
       (let* ((path (pathname path))
-	     (file (truename path))
-	     stream)
-	(unwind-protect
-	     (setf stream
-		   (sb-sys:make-fd-stream fd
-					  :auto-close t
-					  :input t
-					  :output t
-					  :name (format nil "temporary ~D ~A"
-							fd file)
-					  :pathname (pathname path)
-					  :file file
-					  :element-type element-type
-					  :external-format external-format))
-	  (unless stream
-	    (sb-posix:close fd)))
-	stream))))
+             (file (truename path))
+             stream)
+        (unwind-protect
+             (setf stream
+                   (sb-sys:make-fd-stream fd
+                                          :auto-close t
+                                          :input t
+                                          :output t
+                                          :name (format nil "temporary ~D ~A"
+                                                        fd file)
+                                          :pathname (pathname path)
+                                          :file file
+                                          :element-type element-type
+                                          :external-format external-format))
+          (unless stream
+            (sb-posix:close fd)))
+        stream))))
 
 (defun link-file (oldpath newpath)
   #+sbcl(sb-posix:link oldpath newpath))
@@ -100,14 +100,14 @@
   #+sbcl(sb-posix:unlink pathname))
 
 (defmacro with-temporary-file ((stream-var &rest options)
-			       &body body)
+                               &body body)
   (let ((g!stream (gensym "STREAM-")))
     `(let ((,g!stream (open-temporary-file ,@options)))
        (unwind-protect
-	    (let ((,stream-var ,g!stream))
-	      ,@body)
-	 (close ,g!stream)
-	 (unlink-file (pathname ,g!stream))))))
+            (let ((,stream-var ,g!stream))
+              ,@body)
+         (close ,g!stream)
+         (unlink-file (pathname ,g!stream))))))
 
 ;;  Stat
 
@@ -120,14 +120,14 @@
 Return NIL otherwise."
   (or (not (file-exists-p b))
       (and (file-exists-p a)
-	   (> (file-write-date a) (file-write-date b)))))
+           (> (file-write-date a) (file-write-date b)))))
 
 (defun directories (list)
   (declare (type list list))
   (mapcar (lambda (p)
-	    (enough-namestring p
-			       (truename *default-pathname-defaults*)))
-	  (mapcan #'directory list)))
+            (enough-namestring p
+                               (truename *default-pathname-defaults*)))
+          (mapcan #'directory list)))
 
 ;;  Copying
 
@@ -136,27 +136,27 @@ Return NIL otherwise."
   (let (copied updated)
     (dolist (src (directory from))
       (let* ((src (enough-namestring src))
-	     (name (make-pathname :name (pathname-name src)
-				  :type (pathname-type src))))
-	(unless (etypecase exclude
-		  (sequence (member name exclude :test #'pathname-match-p))
-		  (function (funcall exclude name))
-		  (null nil))
-	  (let ((dest (if (pathname-name to)
-			  to
-			  (let ((renamed
-				 (etypecase rename
-				   (list (cdr
-					  (assoc name rename
-						 :test #'pathname-match-p)))
-				   (function (funcall rename
-						      (format nil "~A" name)))
-				   (null nil))))
-			    (merge-pathnames (or renamed name) to)))))
-	    (unless (and update (not (file-more-recent-p src dest)))
-	      (cl-fad:copy-file src dest :overwrite (or replace update))
-	      (push dest updated))
-	    (push dest copied)))))
+             (name (make-pathname :name (pathname-name src)
+                                  :type (pathname-type src))))
+        (unless (etypecase exclude
+                  (sequence (member name exclude :test #'pathname-match-p))
+                  (function (funcall exclude name))
+                  (null nil))
+          (let ((dest (if (pathname-name to)
+                          to
+                          (let ((renamed
+                                 (etypecase rename
+                                   (list (cdr
+                                          (assoc name rename
+                                                 :test #'pathname-match-p)))
+                                   (function (funcall rename
+                                                      (format nil "~A" name)))
+                                   (null nil))))
+                            (merge-pathnames (or renamed name) to)))))
+            (unless (and update (not (file-more-recent-p src dest)))
+              (cl-fad:copy-file src dest :overwrite (or replace update))
+              (push dest updated))
+            (push dest copied)))))
     (values (nreverse copied) (nreverse updated))))
 
 
@@ -192,22 +192,22 @@ Return NIL otherwise."
 (defun regex-do-matches (regex string fn)
   (cl-ppcre:do-scans (match-start match-end reg-starts reg-ends regex string)
     (let ((match (subseq string match-start match-end))
-	  (regs (loop for i below (length reg-starts)
-		   for start = (aref reg-starts i)
-		   for end = (aref reg-ends i)
-		   collect (subseq string start end))))
+          (regs (loop for i below (length reg-starts)
+                   for start = (aref reg-starts i)
+                   for end = (aref reg-ends i)
+                   collect (subseq string start end))))
       (apply fn match regs))))
 
 (defun regex% (regex string replace match-fun output)
   (cond
     (replace (multiple-value-bind (replaced matched)
-		 (cl-ppcre:regex-replace-all regex string replace :simple-calls t)
-	       (when (and match-fun matched)
-		 (funcall match-fun replaced))
-	       (when output
-		 (write-string replaced output)
-		 (terpri output))
-	       replaced))
+                 (cl-ppcre:regex-replace-all regex string replace :simple-calls t)
+               (when (and match-fun matched)
+                 (funcall match-fun replaced))
+               (when output
+                 (write-string replaced output)
+                 (terpri output))
+               replaced))
     (match-fun (regex-do-matches regex string match-fun))
     (t (warn "Neither replace or match were given to regex."))))
 
@@ -217,20 +217,20 @@ Return NIL otherwise."
 
 (defun regex-lines (regex input &key replace match output)
   (labels ((resolve (input match output)
-	     (cond ((typep input 'pathname)
-		    (with-input-from-file/utf-8 (stream input)
-		      (resolve stream match output)))
-		   ((typep output 'pathname)
-		    (with-output-to-file/utf-8 (stream output)
-		      (resolve input match stream)))
-		   (t
-		    (regex-stream-lines regex input replace match output)))))
+             (cond ((typep input 'pathname)
+                    (with-input-from-file/utf-8 (stream input)
+                      (resolve stream match output)))
+                   ((typep output 'pathname)
+                    (with-output-to-file/utf-8 (stream output)
+                      (resolve input match stream)))
+                   (t
+                    (regex-stream-lines regex input replace match output)))))
     (resolve input match output)))
 
 (defun read-into-string (stream)
   (with-output-to-string (string)
     (let ((buffer (make-string 1024 :initial-element #\#)))
       (loop
-	 :for pos = (read-sequence buffer stream)
-	 :while (< 0 pos)
-	 :do (write-sequence buffer string :end pos)))))
+         :for pos = (read-sequence buffer stream)
+         :while (< 0 pos)
+         :do (write-sequence buffer string :end pos)))))
