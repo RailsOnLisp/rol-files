@@ -68,8 +68,8 @@
 
 ;;  Temporary files
 
-(defun open-temporary-file (&key (element-type 'base-char)
-                              (external-format :default)
+(defun open-temporary-file (&key (element-type 'character)
+                              (external-format :utf-8)
                               (prefix "/tmp/.tmp"))
   (let ((template (merge-pathnames
                    (pathname (format nil "~A.XXXXXXXXXXXX" prefix)))))
